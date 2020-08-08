@@ -1,0 +1,1 @@
+cmd_/home/basti/Documents/Programming_Projects/C-Projects/kernel/eudyptula/challenge_6/modules.order := {   echo /home/basti/Documents/Programming_Projects/C-Projects/kernel/eudyptula/challenge_6/char_device_driver.ko; :; } | awk '!x[$$0]++' - > /home/basti/Documents/Programming_Projects/C-Projects/kernel/eudyptula/challenge_6/modules.order
