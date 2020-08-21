@@ -1,1 +1,0 @@
-cmd_/home/basti/Documents/Programming_Projects/C-Projects/kernel/eudyptula/challenge_6/Module.symvers := sed 's/ko$$/o/' /home/basti/Documents/Programming_Projects/C-Projects/kernel/eudyptula/challenge_6/modules.order | scripts/mod/modpost -m    -o /home/basti/Documents/Programming_Projects/C-Projects/kernel/eudyptula/challenge_6/Module.symvers -e -i Module.symvers   -T -

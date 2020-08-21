@@ -1,0 +1,11 @@
+modules.order
+Module.symvers
+kernel/*.ko
+kernel/*.mod
+kernel/*.mod.c
+kernel/*.mod.o
+kernel/*.o
+*.cmd
+driver
+unit-test.out
+user-space/unity

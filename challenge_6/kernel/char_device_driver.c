@@ -7,6 +7,7 @@
 #include <linux/string.h>
 
 #define DEVICE_NAME "eudyptula"
+#define MAX_EUDYPTULA_BUFFER 10
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Sebastian Fricke");
@@ -18,7 +19,8 @@ static ssize_t eudyptula_write(struct file *, const char __user *, size_t, loff_
 static int eudyptula_open(struct inode *, struct file *);
 static int eudyptula_release(struct inode *, struct file *);
 
-static char intern_buffer[5] = {0};
+static char intern_buffer[MAX_EUDYPTULA_BUFFER] = {0};
+static char new_buffer[MAX_EUDYPTULA_BUFFER] = {0};
 
 static struct file_operations eudyptula_fops = {
 	.owner = THIS_MODULE,
@@ -46,7 +48,6 @@ static ssize_t eudyptula_read(struct file *fp, char __user *buffer,
 		return -1;
 	}
 
-	pr_info("%s: read %s to user-space\n", DEVICE_NAME, intern_buffer);
 	copy_bytes = copy_to_user(buffer, intern_buffer, conversion_bytes);
 	if (copy_bytes < 0) {
 		pr_warn("%s: Copy to user failed\n", DEVICE_NAME);
@@ -58,35 +59,33 @@ static ssize_t eudyptula_read(struct file *fp, char __user *buffer,
 static ssize_t eudyptula_write(struct file *fp, const char __user *buffer,
 				     size_t count, loff_t *offset)
 {
-	long copy_bytes = 0;
-
-	// TODO: Replace magic value
-	pr_info("%s: count: %ld\n", DEVICE_NAME, count);
-	pr_info("%s: offset: %lln\n", DEVICE_NAME, offset);
-	pr_info("%s: intern(%s)\n", DEVICE_NAME, intern_buffer);
-	pr_info("%s: user(%s)\n", DEVICE_NAME, buffer);
-	// if (strncmp(intern_buffer, buffer, 4) != 0) {
-	//	return -EINVAL;
-	// }
-
-	pr_info("%s: write\n", DEVICE_NAME);
-	copy_bytes = copy_from_user(intern_buffer, buffer, count);
-	if (copy_bytes < 0) {
-		pr_warn("%s: Copy from user failed\n", DEVICE_NAME);
-		return -1;
+	int ret = 0;
+	if (count > MAX_EUDYPTULA_BUFFER) {
+		return -EOVERFLOW;
 	}
-	return copy_bytes;
+
+	// Reset the buffer after each call
+	if (strnlen(new_buffer, MAX_EUDYPTULA_BUFFER) > 0) {
+		memset(new_buffer, 0, MAX_EUDYPTULA_BUFFER);
+	}
+
+	ret = copy_from_user(new_buffer, buffer, count);
+	if (ret != 0) {
+		return -EFAULT;
+	}
+	if (strncmp(new_buffer, intern_buffer, 4) != 0) {
+		return -EINVAL;
+	}
+	return ret;
 }
 
 static int eudyptula_open(struct inode *inode, struct file *fp)
 {
-	pr_info("%s: open\n", DEVICE_NAME);
 	return 0;
 }
 
 static int eudyptula_release(struct inode *inode, struct file *fp)
 {
-	pr_info("%s: release\n", DEVICE_NAME);
 	return 0;
 }
 
